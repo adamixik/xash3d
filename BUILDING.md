@@ -1,6 +1,7 @@
 # Building
 
 ## Windows
+
 * #### Prerequisites
 * [Git for Windows] - https://git-scm.com/downloads
 * [Visual Studio] - https://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx
