@@ -25,11 +25,11 @@ project (XASH3D)
 
 set (XASH3D_VERSION 0.96.3030)
 
-set (HL_SDK_DIR ${CMAKE_SOURCE_DIR}/HLSDK CACHE PATH "Half Life 1 SDK directory")
+set (HL_SDK_DIR ${CMAKE_SOURCE_DIR}/deps/HLSDK CACHE PATH "Half Life 1 SDK directory")
 
 if(WIN32)
 	set(SDL_SHARED OFF)
-	add_subdirectory(win32)
+	add_subdirectory(deps)
 endif()
 
 option(PANDORA "Set to ON if targeting an OpenPandora device" ${PANDORA})
