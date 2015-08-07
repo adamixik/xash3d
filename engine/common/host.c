@@ -707,8 +707,33 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	char		moduleName[64];
 	string		szRootPath;
 
+	CRT_Init(); // init some CRT functions
+
+	// some commands may turn engine into infinity loop,
+	// e.g. xash.exe +game xash -game xash
+	// so we clearing all cmd_args, but leave dbg states as well
+	Sys_ParseCommandLine( argc, argv );
+	
+	host.enabledll = !Sys_CheckParm( "-nodll" );
+#ifdef DLL_LOADER
+	if( host.enabledll )
+		Setup_LDT_Keeper(); // Must call before any thread creating
+#endif
+
+#ifdef XASH_SDL
+	if( SDL_Init( SDL_INIT_VIDEO |
+				SDL_INIT_TIMER |
+				SDL_INIT_AUDIO |
+				SDL_INIT_JOYSTICK |
+				SDL_INIT_EVENTS ))
+	{
+		MsgDev(D_ERROR, "SDL_Init: %s", SDL_GetError());
+		return 0;
+	}
+#endif
+
 #if defined(__ANDROID__)
-	Q_strncpy(host.rootdir, GAMEPATH, sizeof(host.rootdir));
+	Q_strncpy(host.rootdir, getenv("XASH3D_BASEDIR"), sizeof(host.rootdir));
 #elif defined(XASH_SDL)
 	if( !(SDL_GetBasePath()) )
 		Sys_Error( "couldn't determine current directory" );
@@ -725,17 +750,28 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	SetErrorMode( SEM_FAILCRITICALERRORS );	// no abort/retry/fail errors
 	host.oldFilter = SetUnhandledExceptionFilter( Sys_Crash );
 	host.hInst = GetModuleHandle( NULL );
+#elif defined (__ANDROID__)
+//TODO
+#else
+	struct sigaction act;
+	act.sa_sigaction = Sys_Crash;
+	act.sa_flags = SA_SIGINFO | SA_ONSTACK;
+	sigaction(SIGSEGV, &act, &host.oldFilter);
+	sigaction(SIGABRT, &act, &host.oldFilter);
+	sigaction(SIGBUS, &act, &host.oldFilter);
+	sigaction(SIGILL, &act, &host.oldFilter);
 #endif
 	host.change_game = bChangeGame;
 	host.state = HOST_INIT; // initialzation started
 	host.developer = host.old_developer = 0;
 
-	CRT_Init(); // init some CRT functions
 
+#ifdef _WIN32
+	SetErrorMode( SEM_FAILCRITICALERRORS );	// no abort/retry/fail errors
+#endif
 	// some commands may turn engine into infinity loop,
 	// e.g. xash.exe +game xash -game xash
 	// so we clearing all cmd_args, but leave dbg states as well
-	Sys_ParseCommandLine( argc, argv );
 
 	host.mempool = Mem_AllocPool( "Zone Engine" );
 
@@ -750,9 +786,24 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 		}
 		else host.developer++; // -dev == 1, -dev -console == 2
 	}
+	if( !Sys_CheckParm( "-vguiloader" ) || !Sys_GetParmFromCmdLine( "-vguiloader", host.vguiloader ) )
+	{
+#ifdef _WIN32
+		Q_strcpy(host.vguiloader, "vgui_support.dll");
+#else
+		Q_strcpy(host.vguiloader, "libvgui_support.so");
+#endif
+	}
+
 
 	host.type = HOST_NORMAL; // predict state
 	host.con_showalways = true;
+
+	host.mouse_visible = false;
+
+#ifdef PANDORA
+	if( Sys_CheckParm( "-noshouldermb" )) noshouldermb = 1;
+#endif
 
 #if defined(__ANDROID__)
 	if (chdir(host.rootdir) == 0)
@@ -768,13 +819,12 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	}
 #else
 	FS_FileBase( host.rootdir, SI.ModuleName );
-#endif
 
 #ifdef _WIN32
-	GetModuleFileName(host.hInst, &moduleName, sizeof(moduleName));
+	GetModuleFileName( host.hInst, moduleName, sizeof(moduleName) );
 #else
 	// We didn't need full path, only executable name
-	strcpy(moduleName, strrchr(argv[0], '/'));
+	Q_strncpy(moduleName, strrchr(argv[0], '/'), sizeof(moduleName) );
 	//strrchr adds a / at begin of string =(
 	memmove(&moduleName[0], &moduleName[1], sizeof(moduleName) - 1);
 #endif
@@ -782,12 +832,13 @@ void Host_InitCommon( int argc, const char** argv, const char *progname, qboolea
 	Q_strncpy(SI.ModuleName, moduleName, sizeof(SI.ModuleName));
 
 	FS_ExtractFilePath( SI.ModuleName, szRootPath );
-	if( Q_stricmp( host.rootdir, szRootPath ))
+	/*if( Q_stricmp( host.rootdir, szRootPath ))
 	{
 		Q_strncpy( host.rootdir, szRootPath, sizeof( host.rootdir ));
 		SetCurrentDirectory( host.rootdir );
-	}
-
+	}*/
+#endif
+	SetCurrentDirectory( host.rootdir );
 	Q_strncpy( SI.ModuleName, progname, sizeof( SI.ModuleName ));
 
 #ifdef XASH_DEDICATED
@@ -878,17 +929,6 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 	static double	oldtime, newtime;
 
 	pChangeGame = func;	// may be NULL
-#ifdef XASH_SDL
-	if( SDL_Init( SDL_INIT_VIDEO |
-				SDL_INIT_TIMER |
-				SDL_INIT_AUDIO |
-				SDL_INIT_JOYSTICK |
-				SDL_INIT_EVENTS ))
-	{
-		MsgDev(D_ERROR, "SDL_Init: %s", SDL_GetError());
-		return 0;
-	}
-#endif
 
 	Host_InitCommon( argc, argv, progname, bChangeGame );
 
@@ -1000,12 +1040,12 @@ int EXPORT Host_Main( int argc, const char **argv, const char *progname, int bCh
 		while( SDL_PollEvent( &event ) )
 			SDLash_EventFilter( &event );
 #endif
-		#ifdef __ANDROID__
-		void AndroidEvents();
-		AndroidEvents();
-		#endif
+
 		newtime = Sys_DoubleTime ();
 		Host_Frame( newtime - oldtime );
+		#ifdef __ANDROID__
+		Android_Events();
+		#endif
 		oldtime = newtime;
 	}
 

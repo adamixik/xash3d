@@ -85,8 +85,11 @@ endif()
     target_link_libraries(${XASH_ENGINE_LIBRARY} ${SDL2_LIBRARIES})
 endif()
 
+
+
 if(XASH_VGUI)
     add_definitions(-DXASH_VGUI)
+
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         target_link_libraries(${XASH_ENGINE_LIBRARY} -L${HL_SDK_DIR}/linux/release/ ${HL_SDK_DIR}/linux/release/vgui.dylib)
     endif()
@@ -104,6 +107,10 @@ if(XASH_GLES)
     add_definitions(-DXASH_GLES)
 endif()
 
+if(XASH_DLL_LOADER)
+    add_definitions(-DDLL_LOADER)
+    target_link_libraries(${XASH_ENGINE_LIBRARY} libloader.so)
+endif()
 if(XASH_DEDICATED)
     add_definitions(-DXASH_DEDICATED)
 endif()
