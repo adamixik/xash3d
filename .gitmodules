@@ -1,9 +1,0 @@
-[submodule "SDL-mirror"]
-	path = SDL-mirror
-	url = git://github.com/spurious/SDL-mirror
-[submodule "SDL2"]
-	path = deps/SDL2
-	url = git://github.com/spurious/SDL-mirror
-[submodule "HLSDK"]
-	path = deps/HLSDK
-	url = git://github.com/SDLash3D/halflife

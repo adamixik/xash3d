@@ -73,8 +73,7 @@ endif()
 if(XASH_SDL)
     include(FindPkgConfig)
 if(WIN32)
-    set(SDL2_INCLUDE_DIRS ../win32/SDL2/include)
-    #set(SDL2_IMAGE_INCLUDE_DIRS ../win32/SDL2_image/include)
+    set(SDL2_INCLUDE_DIRS ../deps/SDL2/include)
 else()
     pkg_search_module(SDL2 REQUIRED sdl2)
     pkg_search_module(SDL2_IMAGE REQUIRED SDL2_image)
@@ -114,4 +113,5 @@ target_link_libraries(${XASH_ENGINE_LIBRARY}
 
 set_target_properties (${XASH_ENGINE_SHARED} PROPERTIES
     VERSION ${XASH3D_VERSION} SOVERSION ${XASH3D_VERSION}
-    POSITION_INDEPENDENT_CODE 1)
+    POSITION_INDEPENDENT_CODE 1
+)

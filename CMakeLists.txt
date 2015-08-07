@@ -27,8 +27,11 @@ set (XASH3D_VERSION 0.96.3030)
 
 set (HL_SDK_DIR ${CMAKE_SOURCE_DIR}/deps/HLSDK CACHE PATH "Half Life 1 SDK directory")
 
+set (OUTPUT_DIR ${CMAKE_SOURCE_DIR}/output CACHE PATH "Output directory")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+
 if(WIN32)
-	set(SDL_SHARED OFF)
+	set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
 	add_subdirectory(deps)
 endif()
 
@@ -45,3 +48,5 @@ add_subdirectory (game_launch)
 if(WIN32)
 add_dependencies(xash SDL2main)
 endif()
+
+
