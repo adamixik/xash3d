@@ -44,6 +44,7 @@ endif()
 
 add_subdirectory (engine)
 add_subdirectory (game_launch)
+add_subdirectory (vgui_support)
 
 if(WIN32)
     add_dependencies(xash SDL2main)
