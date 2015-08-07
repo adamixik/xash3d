@@ -115,7 +115,7 @@ void *Com_FunctionFromName( void *hInstance, const char *pName )
 		return Loader_GetProcAddress(hInstance, pName);
 	else
 #endif
-	function = dlsym( hInstance, pName );	
+	function = Com_GetProcAddress(hInstance, pName);
 	if(!function)
 	{
 #ifdef __ANDROID__

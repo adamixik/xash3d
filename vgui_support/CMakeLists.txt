@@ -21,35 +21,22 @@
 #
 
 cmake_minimum_required(VERSION 2.6.0)
-project (XASH3D)
+project (VGUI_SUPPRORT)
 
-set (XASH3D_VERSION 0.96.3030)
-option (HL_SDK_DIR "Build Half Life 1 SDK [specify directory]" OFF)
-option (XASHXT_CLIENT_DIR "Build the XashXT client [specify directory]]" OFF)
-option (LINK_VGUI "Link the VGUI library from HLSDK" ON)
+# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os")
+set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O3")
 
-set (OUTPUT_DIR ${CMAKE_SOURCE_DIR}/output CACHE PATH "Output directory")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+set (VGUI_SUPPRORT_LIBRARY vgui_support)
 
-if(WIN32)
-	set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
-	add_subdirectory(deps)
-endif()
+file (GLOB VGUI_SUPPRORT_SOURCES *.cpp)
 
-option(PANDORA "Set to ON if targeting an OpenPandora device" ${PANDORA})
+include_directories (../common ../engine ../pm_shared ${HL_SDK_DIR}/pm_shared)
+add_library (${VGUI_SUPPRORT_LIBRARY} SHARED ${VGUI_SUPPRORT_SOURCES})
 
-if(NOT XASH_DEDICATED)
-	add_subdirectory (mainui)
-endif()
-
-add_subdirectory (engine)
-add_subdirectory (game_launch)
-
-if(WIN32)
-    add_dependencies(xash SDL2main)
-endif()
-
-if(XASHXT_CLIENT_DIR)
-    add_subdirectory(${XASHXT_CLIENT_DIR})
-endif()
-
+set_target_properties (${VGUI_SUPPRORT_SHARED} PROPERTIES
+	VERSION ${XASH3D_VERSION} SOVERSION ${XASH3D_VERSION}
+	POSITION_INDEPENDENT_CODE 1)
