@@ -29,6 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //CR
 #include "ui_title_anim.h"
 
+#ifdef WIN32
+#define sin(a) sin((double)a)
+#endif
+
 #ifdef _DEBUG
 void DBG_AssertFunction( BOOL fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage )
 {

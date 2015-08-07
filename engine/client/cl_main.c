@@ -19,7 +19,7 @@ GNU General Public License for more details.
 #include "cl_tent.h"
 #include "gl_local.h"
 #include "input.h"
-#include "../cl_dll/kbutton.h"
+#include "../common/kbutton.h"
 #include "vgui_draw.h"
 
 #define MAX_TOTAL_CMDS		16
@@ -673,7 +673,9 @@ CL_Connect_f
 ================
 */
 
+#ifndef WIN32
 #include <sys/mman.h>
+#endif	
 void CL_Connect_f( void )
 {
 	char server[ sizeof( cls.servername ) ];

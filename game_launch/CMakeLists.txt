@@ -36,21 +36,29 @@ endif()
 
 if(XASH_SDL)
 	include(FindPkgConfig)
-	pkg_search_module(SDL2 REQUIRED sdl2)
-	include_directories(${SDL2_INCLUDE_DIRS})
+if(WIN32)
+    set(SDL2_INCLUDE_DIRS ../win32/SDL2/include)
+else()
+    pkg_search_module(SDL2 REQUIRED sdl2)
+endif()
 
-	add_definitions(-DXASH_SDL)
+    add_definitions(-DXASH_SDL)
+    include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 endif()
 
 set (XASH_LAUNCHER_EXECUTABLE xash3d)
 
 file (GLOB XASH_LAUNCHER_SOURCES *.cpp)
 
-add_executable (${XASH_LAUNCHER_EXECUTABLE} ${XASH_LAUNCHER_SOURCES})
+add_executable (${XASH_LAUNCHER_EXECUTABLE} WIN32 ${XASH_LAUNCHER_SOURCES})
 
 if(XASH_SDL)
+if(WIN32)
+        
+else()
 	target_link_libraries(${XASH_LAUNCHER_EXECUTABLE} ${SDL2_LIBRARIES})
-endif()
+endif() # WIN32
+endif() # XASH_SDL
 
 target_link_libraries(${XASH_LAUNCHER_EXECUTABLE}
 	${CMAKE_DL_LIBS})

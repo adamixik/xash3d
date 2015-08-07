@@ -94,8 +94,11 @@ static _inline void Huff_PrepareTree( tree_t tree )
 	
 	// create first node
 	node = &tree[263];
-	VALUE( tree[0]++ );
-
+#ifdef WIN32
+	VALUE(tree[0])++;
+#else
+	VALUE(tree[0]++);
+#endif
 	node[7] = NODE_NONE;
 	tree[2] = node;
 	tree[3] = node;
@@ -116,7 +119,11 @@ static _inline void **Huff_GetNode( void **tree )
 	node = tree[262];
 	if( !node )
 	{
+#ifdef WIN32
+		value = VALUE( tree[1] )++;
+#else
 		value = VALUE( tree[1]++ );
+#endif
 		node = &tree[value + 6407];
 		return node;
 	}
@@ -249,8 +256,11 @@ static void Huff_IncrementFreq_r( void **tree1, void **tree2 )
 		Huff_DeleteNode( tree1, tree2[5] );
 	}
 
-	
+#ifdef WIN32
+	VALUE( tree2[6] )++;
+#else
 	VALUE( tree2[6]++ );
+#endif
 	a = tree2[3];
 	if( a && a[6] == tree2[6] )
 	{
@@ -295,11 +305,18 @@ static void Huff_AddReference( void **tree, int ch )
 		Huff_IncrementFreq_r( tree, tree[ch + 5] );
 		return; // already added
 	}
-
+#ifdef WIN32
+	value = VALUE( tree[0] )++;
+#else
 	value = VALUE( tree[0]++ );
+#endif
 	b = &tree[value * 8 + 263];
 
-	value = VALUE( tree[0]++ );
+#ifdef WIN32
+	value = VALUE(tree[0])++;
+#else
+	value = VALUE(tree[0]++);
+#endif
 	a = &tree[value * 8 + 263];
 
 	a[7] = NODE_NEXT;

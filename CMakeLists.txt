@@ -24,12 +24,24 @@ cmake_minimum_required(VERSION 2.6.0)
 project (XASH3D)
 
 set (XASH3D_VERSION 0.96.3030)
-set (HL_SDK_DIR /opt/halflife CACHE PATH "Half Life 1 SDK directory")
+
+set (HL_SDK_DIR ${CMAKE_SOURCE_DIR}/HLSDK CACHE PATH "Half Life 1 SDK directory")
+
+if(WIN32)
+	set(SDL_SHARED OFF)
+	add_subdirectory(win32)
+endif()
 
 option(PANDORA "Set to ON if targeting an OpenPandora device" ${PANDORA})
+
+
 
 if(NOT XASH_DEDICATED)
 	add_subdirectory (mainui)
 endif()
 add_subdirectory (engine)
 add_subdirectory (game_launch)
+
+if(WIN32)
+add_dependencies(xash SDL2main)
+endif()

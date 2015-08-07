@@ -72,13 +72,18 @@ endif()
 
 if(XASH_SDL)
     include(FindPkgConfig)
+if(WIN32)
+    set(SDL2_INCLUDE_DIRS ../win32/SDL2/include)
+    #set(SDL2_IMAGE_INCLUDE_DIRS ../win32/SDL2_image/include)
+else()
     pkg_search_module(SDL2 REQUIRED sdl2)
     pkg_search_module(SDL2_IMAGE REQUIRED SDL2_image)
+    
+endif()
+    add_definitions(-DXASH_SDL)
 
     include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
-
-    add_definitions(-DXASH_SDL)
-    target_link_libraries(${XASH_ENGINE_LIBRARY} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+    target_link_libraries(${XASH_ENGINE_LIBRARY} ${SDL2_LIBRARIES})
 endif()
 
 if(XASH_VGUI)
@@ -89,6 +94,9 @@ if(XASH_VGUI)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         add_custom_command(TARGET xash PRE_LINK COMMAND ${CMAKE_COMMAND} -E copy ${HL_SDK_DIR}/linux/vgui.so $<TARGET_SONAME_FILE_DIR:xash>)
         target_link_libraries(${XASH_ENGINE_LIBRARY} -L. -l:vgui.so)
+    endif()
+    if(WIN32)
+        target_link_libraries(${XASH_ENGINE_LIBRARY} ${HL_SDK_DIR}/utils/vgui/lib/win32_vc6/vgui.lib)
     endif()
     INCLUDE_DIRECTORIES(${HL_SDK_DIR}/utils/vgui/include)
 endif()
@@ -102,7 +110,7 @@ if(XASH_DEDICATED)
 endif()
 
 target_link_libraries(${XASH_ENGINE_LIBRARY}
-    ${CMAKE_DL_LIBS})
+    ${CMAKE_DL_LIBS} SDL2-static)
 
 set_target_properties (${XASH_ENGINE_SHARED} PROPERTIES
     VERSION ${XASH3D_VERSION} SOVERSION ${XASH3D_VERSION}

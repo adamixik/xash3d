@@ -57,7 +57,7 @@ HINSTANCE	hEngine;
 
 void Sys_Error( const char *errorstring )
 {
-#ifdef XASH_SDL
+#if defined (XASH_SDL) && !defined (WIN32)
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Xash Error", errorstring, NULL);
 #endif
 	fprintf(stderr, "Xash Error: %s\n", errorstring);
@@ -106,14 +106,14 @@ void Sys_ChangeGame( const char *progname )
 
 	Xash_Main( szArgc, szArgv, szGameDir, true, ( Xash_Shutdown != NULL ) ? Sys_ChangeGame : NULL );
 }
-#if 0
+#ifdef WIN32
 int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int nShow)
 #else // _WIN32
 int main( int argc, char **argv )
 #endif
 {
 
-#if 0
+#ifdef WIN32
 	LPWSTR* lpArgv = CommandLineToArgvW(GetCommandLineW(), &szArgc);
 	szArgv = (char**)malloc(szArgc*sizeof(char*));
 	int size, i = 0;

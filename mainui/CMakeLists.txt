@@ -34,10 +34,14 @@ if(PANDORA)
 	add_definitions(-DPANDORA)
 endif()
 
+if(WIN32)
+set (MAINUI_LIBRARY menu)
+else()
 set (MAINUI_LIBRARY xashmenu)
+endif()
 
 file (GLOB MAINUI_SOURCES *.cpp)
-include_directories (../common ../engine ${HL_SDK_DIR}/pm_shared)
+include_directories (../common ../engine ../pm_shared ${HL_SDK_DIR}/pm_shared)
 add_library (${MAINUI_LIBRARY} SHARED ${MAINUI_SOURCES})
 
 set_target_properties (${MAINUI_SHARED} PROPERTIES
